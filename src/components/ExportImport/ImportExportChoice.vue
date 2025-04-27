@@ -5,13 +5,13 @@
                 <el-col :span="12">
                     <el-card style="width: 100%; cursor:pointer; text-align: center;" shadow="always" @click="currentView = 'export'">
                         <el-icon style="font-size: 30px;"><Download /></el-icon>
-                        <h3>Export Snippets</h3>
+                        <h3>{{$t('Export Snippets')}}</h3>
                     </el-card>
                 </el-col>
                 <el-col :span="12">
                     <el-card style="width: 100%; cursor:pointer; text-align: center;" shadow="always" @click="currentView = 'import'">
                         <el-icon style="font-size: 30px;"><UploadFilled /></el-icon>
-                        <h3>Import Snippets</h3>
+                        <h3>{{$t('Import Snippets')}}</h3>
                     </el-card>
                 </el-col>
             </el-row>

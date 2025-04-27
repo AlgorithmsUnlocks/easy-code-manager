@@ -1,12 +1,12 @@
 <template>
     <div class="ecm-export-import">
-        <h3>Please select which snippets you would like to export:</h3>
+        <h3>{{$t('Please select which snippets you would like to export:')}}</h3>
         <el-checkbox
             v-model="checkAll"
             :indeterminate="isIndeterminate"
             @change="handleCheckAllChange"
         >
-            Check all
+            {{$t('Select all snippets')}}
         </el-checkbox>
         <el-checkbox-group
             class="ecm_listed_checkboxes"
@@ -26,7 +26,8 @@
             </el-checkbox>
         </el-checkbox-group>
         <el-button @click="exportSelectedSnippet()" style="margin-top: 20px;" v-loading="exporting"
-                   :disabled="!selectedSnippets.length" type="primary">Export Select Snippets
+                   :disabled="!selectedSnippets.length" type="primary">
+           {{$t('Export Select Snippets')}}
         </el-button>
     </div>
 </template>

@@ -18,7 +18,7 @@
                     </el-breadcrumb>
                 </div>
                 <div  v-loading="saving" v-if="snippet" style="display: flex;" class="box_actions">
-                    <el-button title="Command / CTR + S to save" @click="saveCode()" :disabled="loading || saving" type="success">
+                    <el-button :title="$t('Command / CTR + S to save')" @click="saveCode()" :disabled="loading || saving" type="success">
                         {{$t('Update Snippet')}}
                     </el-button>
                     <el-button v-if="!snippet.error" @click="toggleStatus()">
@@ -35,9 +35,11 @@
             </div>
             <div v-else class="box_body">
                 <div class="snippet_error_wrap" v-if="snippet.error">
-                    <p>{{$t('The snippet encountered an fatal error and It has been deactivated automatically. Please review your code, fix the issues and reactive.')}}</p>
+                    <p>{{$t('__SNIPPET_FATAL_ERROR__')}}</p>
                     <p><strong>{{$t('Error Message:')}}</strong> {{snippet.error}}</p>
-                    <el-button @click="saveCode(true)" :disabled="loading || saving" type="primary">{{$t('Try Reactivate')}}</el-button>
+                    <el-button @click="saveCode(true)" :disabled="loading || saving" type="primary">
+                        {{$t('Try Reactivate')}}
+                    </el-button>
                 </div>
                 <snippet-form :errors="errors" :snippet="snippet"></snippet-form>
             </div>
@@ -74,7 +76,7 @@ export default {
                 })
                 .catch((errors) => {
                     if (typeof errors == 'string') {
-                        this.$notify.error('Something went wrong. Please check the errors.');
+                        this.$notify.error(this.$t('Something went wrong. Please check the errors.'));
                         this.$eventBus.emit("server_error", errors);
                         return;
                     }
@@ -114,7 +116,7 @@ export default {
                 .catch((errors) => {
 
                     if (typeof errors == 'string') {
-                        this.$notify.error('Something went wrong. Please check the errors.');
+                        this.$notify.error(this.$t('Something went wrong. Please check the errors.'));
                         this.$eventBus.emit("server_error", errors);
                         return;
                     }
@@ -140,13 +142,12 @@ export default {
             }
         }
     },
-    created() {
+    mounted() {
         this.fetchSnippet();
         // save the code on ctrl+s or command+s
         document.addEventListener('keydown', this.maybeKeyboardSave);
     },
     beforeUnmount() {
-        console.log('unmounting');
         document.removeEventListener('keydown', this.maybeKeyboardSave);
     }
 }

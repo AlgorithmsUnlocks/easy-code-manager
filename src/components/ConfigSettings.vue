@@ -16,15 +16,15 @@
                 <el-form v-model="settings" label-position="top">
                     <el-form-item>
                         <el-checkbox true-value="yes" false-value="no" v-model="settings.auto_publish">
-                            Activate Snippets as default action. If disabled then it will be saved as "Draft"
+                            {{$t('Activate Snippets as default action. If disabled then it will be saved as Draft')}}
                         </el-checkbox>
                     </el-form-item>
                     <el-form-item>
                         <el-checkbox true-value="yes" false-value="no" v-model="settings.auto_disable">
-                            Automatically Disable Script on fatal error
+                            {{$t('Automatically Disable Script on fatal error')}}
                         </el-checkbox>
                         <div style="color: red;" v-if="settings.auto_disable != 'yes'">
-                            We highly recommend to enable this option. If disabled, then your site may go down if there has any error on the scripts.
+                            {{$t('__SNIPPET_AUTO_DISABLE_INS__')}}
                         </div>
                     </el-form-item>
                     <el-form-item>

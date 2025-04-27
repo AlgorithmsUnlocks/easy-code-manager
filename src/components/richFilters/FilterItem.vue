@@ -95,9 +95,6 @@
 <script type="text/babel">
 import isArray from 'lodash/isArray';
 import RestSelector from './Elements/_RestSelector.vue';
-// import TaxonomyTermsSelector from './Elements/_TaxonomyTermsSelector';
-// import OptionSelector from './Elements/_OptionSelector';
-// import ItemTimesSelection from './_ItemTimesSelection';
 import {Delete} from '@element-plus/icons-vue'
 import {markRaw} from "vue";
 

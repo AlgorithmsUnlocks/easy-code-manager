@@ -19,7 +19,7 @@
         </div>
         <fsnip-promo :config="appVars.safeModes" />
         <div v-show="hasServerError">
-            <el-button @click="hideErrors()" v-if="hasServerError">Hide Errors</el-button>
+            <el-button @click="hideErrors()" v-if="hasServerError">{{$t('Hide Errors')}}</el-button>
             <div :class="{fluent_snip_server_error : hasServerError}" id="fsnip_shadow_wrapper">
                 <div id="fluent_snip_500_error"></div>
             </div>

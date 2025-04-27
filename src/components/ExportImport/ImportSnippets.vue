@@ -1,6 +1,6 @@
 <template>
     <div v-if="!isImported">
-        <h3>Please upload Code Snippets JSON file to import</h3>
+        <h3>{{$t('Please upload Code Snippets JSON file to import')}}</h3>
         <el-upload
             drag
             :limit="1"
@@ -19,21 +19,21 @@
         <p>{{$t('Please upload Snippets only trusted sources.')}}</p>
     </div>
     <div v-else>
-        <h3>Imported Snippets ({{ snippets.length }})</h3>
-        <p>The snippets are being saved as Draft. Please review and publish.</p>
+        <h3>{{$t('Imported Snippets')}} ({{ snippets.length }})</h3>
+        <p>{{$t('The snippets are being saved as Draft. Please review and publish.')}}</p>
 
         <el-table stripe :data="snippets">
-            <el-table-column min-width="150px" label="Title">
+            <el-table-column min-width="150px" :label="$t('Title')">
                 <template #default="scope">
                     <span>{{ scope.row.name }}</span>
                 </template>
             </el-table-column>
-            <el-table-column min-width="200px" label="Status">
+            <el-table-column min-width="200px" :label="$t('Status')">
                 <template #default="scope">
                     <span>{{ scope.row.reason }}</span>
                 </template>
             </el-table-column>
-            <el-table-column width="120px;" label="Acrtion">
+            <el-table-column width="120px;" :label="$t('Action')">
                 <template #default="scope">
                     <el-button :disabled="publishing" :loading="publishing"
                                v-if="scope.row.status == 'draft'" type="primary"

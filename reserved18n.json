@@ -1,0 +1,4 @@
+{
+  "__SNIPPET_FATAL_ERROR__": "The snippet encountered an fatal error and It has been deactivated automatically. Please review your code, fix the issues and reactive.",
+  "__SNIPPET_AUTO_DISABLE_INS__": "We highly recommend to enable this option. If disabled, then your site may go down if there has any error on the scripts."
+}
