@@ -17,6 +17,7 @@
                             $t('New Snippet')
                         }}
                     </el-button>
+                    <el-button @click="showImportExport = true;" style="margin-left: 10px;">{{$t('Export/Import')}}</el-button>
                 </div>
             </div>
             <div v-if="loadingFirst" class="box_body">
@@ -50,8 +51,8 @@
                     </ul>
                     <div class="snip_right_items">
                         <el-radio-group @change="$storeLocalData('view_type', viewType)" v-model="viewType">
-                            <el-radio-button label="grouped">{{ $t('Grouped') }}</el-radio-button>
-                            <el-radio-button label="table">{{ $t('Table') }}</el-radio-button>
+                            <el-radio-button value="grouped">{{ $t('Grouped') }}</el-radio-button>
+                            <el-radio-button value="table">{{ $t('Table') }}</el-radio-button>
                         </el-radio-group>
                         <el-select style="margin-right: 10px;" size="small" class="snip_ac_item"
                                    clearable placeholder="All tags"
@@ -64,15 +65,15 @@
                                 <div style="max-height: 150px; overflow: auto;">
                                     <el-radio-group class="fct_radios_blocks" v-model="sorting.sortBy">
                                         <el-radio v-for="column in sortingOrderColumns" :key="column.value"
-                                                  :label="column.value">
+                                                  :value="column.value">
                                             {{ column.label }}
                                         </el-radio>
                                     </el-radio-group>
                                 </div>
                                 <hr/>
                                 <el-radio-group size="small" v-model="sorting.sortType">
-                                    <el-radio-button label="ASC">{{ $t('Ascending') }}</el-radio-button>
-                                    <el-radio-button label="DESC">{{ $t('Descending') }}</el-radio-button>
+                                    <el-radio-button value="ASC">{{ $t('Ascending') }}</el-radio-button>
+                                    <el-radio-button value="DESC">{{ $t('Descending') }}</el-radio-button>
                                 </el-radio-group>
                                 <span style="display: block; width: 100%; margin-bottom: 20px;"></span>
                                 <el-button @click="applySorting()" type="success">{{ $t('Apply') }}</el-button>
@@ -142,6 +143,13 @@
                                             d="M3 0l-3 5h2v3l3-5h-2v-3z" transform="translate(1)"></path></svg>
                                     </el-icon>
                                     {{ getRunAtName(scope.row.run_at) }}
+                                </span>
+                                <span class="fc_middot">|</span>
+                                <span style="cursor: pointer;" @click="exportSnippets([scope.row.file_name])">
+                                    <el-icon>
+                                        <download />
+                                    </el-icon>
+                                    {{ $t('Download') }}
                                 </span>
                             </div>
                         </template>
@@ -229,6 +237,14 @@
                                             </template>
                                         </el-popconfirm>
                                         <span class="fc_middot">|</span>
+                                        <span style="cursor: pointer;" @click="exportSnippets([snippet.file_name])">
+                                            <el-icon>
+                                                <download />
+                                            </el-icon>
+                                            {{ $t('Download') }}
+                                        </span>
+
+                                        <span class="fc_middot">|</span>
                                         <span v-if="!snippet.error">
                                             <el-switch size="small" v-model="snippet.status" active-value="published"
                                                        inactive-value="draft"
@@ -287,6 +303,13 @@
                                         </template>
                                     </el-popconfirm>
                                     <span class="fc_middot">|</span>
+                                    <span style="cursor: pointer;" @click="exportSnippets([snippet.file_name])">
+                                        <el-icon>
+                                            <download />
+                                        </el-icon>
+                                        {{ $t('Download') }}
+                                    </span>
+                                    <span class="fc_middot">|</span>
                                     <span>
                                         <el-switch v-if="!snippet.error" size="small" v-model="snippet.status"
                                                    active-value="published" inactive-value="draft"
@@ -323,18 +346,29 @@
                         </div>
                     </el-col>
                 </el-row>
-
             </div>
         </div>
+
+        <el-drawer
+            v-model="showImportExport"
+            :title="$t('Import / Export Snippets')"
+            direction="rtl"
+            size="70%"
+            :append-to-body="true"
+            @closed="getSnippets"
+        >
+            <import-export-choice v-if="showImportExport" :snippets="snippets" />
+        </el-drawer>
+
     </div>
 </template>
 
 <script type="text/babel">
-import {Search, FolderOpened, Folder, Document, Stopwatch, Sort} from '@element-plus/icons-vue';
+import {Search, FolderOpened, Folder, Document, Stopwatch, Sort, Download} from '@element-plus/icons-vue';
 import {markRaw} from 'vue';
 import each from 'lodash/each';
 import Fuse from 'fuse.js'
-
+import ImportExportChoice from "./ExportImport/ImportExportChoice.vue";
 
 export default {
     name: 'Dashboard',
@@ -377,7 +411,8 @@ export default {
                 }
             ],
             showingPop: false,
-            groupCollapsed: {}
+            groupCollapsed: {},
+            showImportExport: false
         }
     },
     components: {
@@ -386,6 +421,8 @@ export default {
         Stopwatch: markRaw(Stopwatch),
         SortIcon: markRaw(Sort),
         FolderClosed: markRaw(Folder),
+        ImportExportChoice,
+        Download: markRaw(Download)
     },
     methods: {
         changePage(page) {

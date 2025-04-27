@@ -4,6 +4,7 @@ namespace FluentSnippets\App\Hooks\Handlers;
 
 use FluentSnippets\App\Helpers\Arr;
 use FluentSnippets\App\Helpers\Helper;
+use FluentSnippets\App\Http\Controllers\SnippetsController;
 use FluentSnippets\App\Model\Snippet;
 use FluentSnippets\App\Services\Trans;
 
@@ -12,6 +13,9 @@ class AdminMenuHandler
     public function register()
     {
         add_action('admin_menu', array($this, 'addMenu'));
+
+        add_action('wp_ajax_fluent_snippets_export_snippets', [$this, 'exportSnippets']);
+        add_action('wp_ajax_fluent_snippets_import_json', [$this, 'importSnippets']);
     }
 
     public function addMenu()
@@ -28,6 +32,216 @@ class AdminMenuHandler
             120
         );
     }
+
+    public function exportSnippets()
+    {
+        if (!current_user_can('install_plugins')) {
+            wp_send_json([
+                'status'  => false,
+                'message' => __('You do not have permission to perform this action.', 'easy-code-manager')
+            ], 422);
+        }
+
+
+        $snippetDir = Helper::getStorageDir();
+
+        $selectedSnippets = Arr::get($_REQUEST, 'snippets', []);
+        $selectedSnippets = array_map(function ($snippet) use ($snippetDir) {
+            // add .php
+            return $snippetDir . '/' . $snippet . '.php';
+        }, $selectedSnippets);
+
+        if (empty($selectedSnippets)) {
+            wp_send_json([
+                'status'  => false,
+                'message' => __('No snippets selected.', 'easy-code-manager')
+            ], 422);
+        }
+
+        // get the file paths and store them in an array
+        $files = glob($snippetDir . '/*.php');
+
+        $selectedSnippets = array_intersect($selectedSnippets, $files);
+
+        if (empty($selectedSnippets)) {
+            wp_send_json([
+                'status'  => false,
+                'message' => __('No snippets selected.', 'easy-code-manager')
+            ], 422);
+        }
+
+        $formattedSnippets = [];
+
+        $snippetModel = new Snippet();
+        foreach ($selectedSnippets as $snippetFile) {
+            if (!file_exists($snippetFile)) {
+                continue;
+            }
+            $fileContent = file_get_contents($snippetFile);
+            [$docBlockArray, $code] = $snippetModel->parseBlock($fileContent);
+
+            if (empty($docBlockArray) || empty($code)) {
+                continue;
+            }
+
+            $base64Code = base64_encode($code);
+            $formattedSnippets[] = [
+                'code'      => $base64Code,
+                'code_hash' => md5($code),
+                'info'      => $docBlockArray,
+            ];
+        }
+
+        $exportData = [
+            'file_type'      => 'fluent_code_snippets',
+            'version'        => FLUENT_SNIPPETS_PLUGIN_VERSION,
+            'snippets'       => $formattedSnippets,
+            'snippets_count' => count($formattedSnippets),
+        ];
+
+        $fileName = 'fluent-snippets-' . count($formattedSnippets) . '-' . date('Y-m-d-H-i') . '.json';
+
+        // export as JSON
+        header('Content-disposition: attachment; filename=' . $fileName);
+        header('Content-type: application/json');
+        echo json_encode($exportData); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        exit();
+    }
+
+    public function importSnippets()
+    {
+        if (!current_user_can('install_plugins')) {
+            wp_send_json([
+                'status'  => false,
+                'message' => __('You do not have permission to perform this action.', 'easy-code-manager')
+            ], 422);
+        }
+
+        $file = $_FILES;
+
+        $jsonFile = $file['file'];
+
+        // get file contents
+        $fileContent = file_get_contents($jsonFile['tmp_name']);
+
+        $fileData = json_decode($fileContent, true);
+
+        if (!$fileData || empty($fileData['file_type']) || $fileData['file_type'] != 'fluent_code_snippets' || empty($fileData['snippets'])) {
+            wp_send_json([
+                'status'  => false,
+                'message' => __('Invalid file format. Please upload a JSON file that is exported from Fluent Snippets', 'easy-code-manager')
+            ], 422);
+        }
+
+        $snippets = Arr::get($fileData, 'snippets', []);
+
+        $createdSnippts = [];
+
+        $existingSnippets = (new Snippet)->get();
+
+        $existingCodeHashes = [];
+
+        foreach ($existingSnippets as $existingSnippet) {
+            $existingCodeHashes[] = md5($existingSnippet['code']);
+        }
+
+        foreach ($snippets as $snippet) {
+            if (empty($snippet['code'])) {
+                continue;
+            }
+
+            $name = Arr::get($snippet, 'info.name', '');
+            if (!$name) {
+                continue;
+            }
+
+            $code = base64_decode($snippet['code']);
+            $codeHash = md5($code);
+
+            if ($codeHash != $snippet['code_hash']) {
+                $createdSnippts[] = [
+                    'name'       => $name,
+                    'is_success' => 'no',
+                    'reason'     => 'Invalid code hash',
+                ];
+                continue;
+            }
+
+            if (in_array($codeHash, $existingCodeHashes)) {
+                $createdSnippts[] = [
+                    'name'       => $name,
+                    'is_success' => 'no',
+                    'reason'     => __('Snippet already exists', 'easy-code-manager')
+                ];
+                continue;
+            }
+
+            $meta = Arr::get($snippet, 'info', []);
+
+            $metaValidated = SnippetsController::validateMeta($meta);
+
+            if (is_wp_error($metaValidated)) {
+                $createdSnippts[] = [
+                    'name'       => $name,
+                    'is_success' => 'no',
+                    'reason'     => $metaValidated->get_error_message()
+                ];
+                continue;
+            }
+            $meta['status'] = 'draft';
+
+            // Check if the php snippet $code is valid or not by validating it
+            if ($meta['type'] == 'php_content') {
+                $code = apply_filters('fluent_snippets/sanitize_mixed_content', $code, $meta);
+                if (is_wp_error($code)) {
+                    $createdSnippts[] = [
+                        'name'       => $name,
+                        'is_success' => 'no',
+                        'reason'     => $metaValidated->get_error_message()
+                    ];
+                    continue;
+                }
+            }
+
+            $validated = Helper::validateCode($meta['type'], $code);
+
+            if (is_wp_error($validated)) {
+                $createdSnippts[] = [
+                    'name'       => $name,
+                    'is_success' => 'no',
+                    'reason'     => $validated->get_error_message()
+                ];
+                continue;
+            }
+
+            $snippetModel = new Snippet();
+            $createdSnippet = $snippetModel->createSnippet($code, $meta);
+
+            if (is_wp_error($createdSnippet)) {
+                $createdSnippts[] = [
+                    'name'       => $name,
+                    'is_success' => 'no',
+                    'reason'     => $createdSnippet->get_error_message()
+                ];
+                continue;
+            }
+
+            $createdSnippts[] = [
+                'name'       => $name,
+                'is_success' => 'yes',
+                'status' => 'draft',
+                'reason'     => 'Imported',
+                'file_name'  => $createdSnippet
+            ];
+        }
+
+        Helper::cacheSnippetIndex();
+
+        wp_send_json([
+            'snippets' => $createdSnippts
+        ]);
+    }
+
 
     public function render()
     {
@@ -83,14 +297,14 @@ class AdminMenuHandler
         if (!$indexConfig) {
             $indexConfig = Helper::getIndexedConfig();
         }
-        
+
         add_filter('admin_footer_text', function ($content) use ($indexConfig) {
             $ext = '';
             if (defined('FLUENT_SNIPPETS_RUNNING_MU')) {
                 $ext = '<b>Standalone (MU Mode) is active</b> ';
             }
 
-            return 'Thank you for using <a rel="noopener"  target="_blank" href="https://fluentsnippets.com">Fluent Snippets</a>.' . ' ' . $ext;
+            return 'Thank you for using <a rel="noopener"  target="_blank" href="https://fluentsnippets.com">Fluent Snippets</a>. <a rel="noopener"  target="_blank" style="text-decoration: none;" href="https://wordpress.org/support/plugin/easy-code-manager/reviews/?filter=5">Write a review ⭐️⭐️⭐️⭐️⭐️</a> ' . $ext;
         });
 
         wp_localize_script('fluent_snippets_app', 'fluentSnippetAdmin', [
@@ -120,7 +334,7 @@ class AdminMenuHandler
             'has_fluentcrm'              => defined('FLUENTCRM'),
             'has_fluentform'             => defined('FLUENTFORM'),
             'has_ninja_tables'           => defined('NINJA_TABLES_VERSION'),
-            'has_line_wrap'              => isset($indexConfig['meta']['enable_line_wrap'])? $indexConfig['meta']['enable_line_wrap'] : 'no',
+            'has_line_wrap'              => isset($indexConfig['meta']['enable_line_wrap']) ? $indexConfig['meta']['enable_line_wrap'] : 'no',
             'disable_recommendation'     => apply_filters('fluentmail_disable_recommendation', false),
         ]);
 
@@ -215,15 +429,15 @@ class AdminMenuHandler
                 'value'             => 'js',
                 'inline_tag'        => 'JS',
                 'running_locations' => [
-                    'wp_head'   => [
+                    'wp_head'      => [
                         'label'       => __('Site Wide Header', 'easy-code-manager'),
                         'description' => __('Run Javascript between the head tags of your website on all pages (frontend).', 'easy-code-manager')
                     ],
-                    'wp_footer' => [
+                    'wp_footer'    => [
                         'label'       => __('Site Wide Footer', 'easy-code-manager'),
                         'description' => __('Run Javascript before the closing body tag of your website on all pages (frontend).', 'easy-code-manager')
                     ],
-                    'admin_head' => [
+                    'admin_head'   => [
                         'label'       => __('Admin Area Header', 'easy-code-manager'),
                         'description' => __('Run Javascript in admin area (/wp-admin/).', 'easy-code-manager')
                     ],

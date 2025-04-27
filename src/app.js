@@ -6,6 +6,7 @@ import {ElNotification, ElLoading, ElMessageBox} from 'element-plus'
 import Storage from '@/Bits/Storage';
 import App from './App.vue';
 import eventBus from './Bits/event-bus';
+
 require('./app.scss');
 
 const dayjs = require('dayjs');
@@ -97,20 +98,36 @@ app.mixin({
             return this.Storage.get(key, defaultValue);
         },
         ucFirst(string) {
-            if(!string) {
+            if (!string) {
                 return '';
             }
             return string.charAt(0).toUpperCase() + string.slice(1);
+        },
+        exportSnippets(snippets) {
+            let selected = snippets.map(snippet => {
+                // replace .php from the end
+                return snippet.replace(/\.php$/, '');
+            });
+
+            if (selected.length === 0) {
+                this.$message.error('Please select at least one snippet to export.');
+                return;
+            }
+
+            location.href = window.ajaxurl + '?' + jQuery.param({
+                action: 'fluent_snippets_export_snippets',
+                snippets: selected
+            });
         }
     },
     watch: {
         $route(to, from) {
             const active = to.meta.active;
-            if(!active) {
+            if (!active) {
                 return;
             }
             jQuery('.fsnip_menu_primary').removeClass('router-link-active');
-            jQuery('.fsnip_menu_primary.fsnip_menu_'+active).addClass('router-link-active');
+            jQuery('.fsnip_menu_primary.fsnip_menu_' + active).addClass('router-link-active');
         }
     }
 });

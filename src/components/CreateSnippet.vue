@@ -22,7 +22,7 @@
                         <el-form-item label="Snippet Type">
                             <el-radio-group @change="snippetTypeChanged()" v-model="snippet.meta.type">
                                 <el-radio v-for="(snippetType, type) in appVars.snippet_types" :key="snippetType.value"
-                                          :label="snippetType.value">
+                                          :value="snippetType.value">
                                     <span class="custom-tabs-label">
                                               {{ snippetType.label }}
                                         <span :class="'fsn_'+snippetType.value.toLowerCase()" class="fsn_label">

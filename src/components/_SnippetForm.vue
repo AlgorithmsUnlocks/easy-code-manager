@@ -94,7 +94,7 @@
                         </span>
                     </template>
 
-                    <el-checkbox true-label="yes" false-label="no" v-model="snippet.meta.load_as_file">
+                    <el-checkbox true-value="yes" false-value="no" v-model="snippet.meta.load_as_file">
                         {{$t('Enable Load as Stylesheet File')}}
                     </el-checkbox>
 

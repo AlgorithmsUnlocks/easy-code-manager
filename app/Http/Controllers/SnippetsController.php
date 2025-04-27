@@ -34,7 +34,6 @@ class SnippetsController
             'time' => current_time('mysql')
         ];
 
-
         if($page == 1) {
             [$tags, $groups] = (new Snippet())->getAllSnippetTagsGroups();
             $data['tags'] = $tags;
@@ -95,7 +94,6 @@ class SnippetsController
         $meta['status'] = 'draft';
 
         // Check if the php snippet $code is valid or not by validating it
-
         if ($meta['type'] == 'PHP') {
             // Check if the code starts with <?php
             if (preg_match('/^<\?php/', $code)) {
@@ -291,7 +289,7 @@ class SnippetsController
         ];
     }
 
-    private static function validateMeta($meta)
+    public static function validateMeta($meta)
     {
         $required = ['name', 'status', 'type', 'run_at'];
 

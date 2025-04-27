@@ -15,12 +15,12 @@
                 <h3>{{$t('General Settings')}}</h3>
                 <el-form v-model="settings" label-position="top">
                     <el-form-item>
-                        <el-checkbox true-label="yes" false-label="no" v-model="settings.auto_publish">
+                        <el-checkbox true-value="yes" false-value="no" v-model="settings.auto_publish">
                             Activate Snippets as default action. If disabled then it will be saved as "Draft"
                         </el-checkbox>
                     </el-form-item>
                     <el-form-item>
-                        <el-checkbox true-label="yes" false-label="no" v-model="settings.auto_disable">
+                        <el-checkbox true-value="yes" false-value="no" v-model="settings.auto_disable">
                             Automatically Disable Script on fatal error
                         </el-checkbox>
                         <div style="color: red;" v-if="settings.auto_disable != 'yes'">
@@ -29,15 +29,15 @@
                     </el-form-item>
                     <el-form-item>
                         <el-checkbox
-                                true-label="yes"
-                                false-label="no"
+                                true-value="yes"
+                                false-value="no"
                                 v-model="settings.enable_line_wrap"
                         >
                             {{ $t("Enable Editor Line Wrap") }}
                         </el-checkbox>
                     </el-form-item>
                     <el-form-item>
-                        <el-checkbox :disabled="true" true-label="yes" false-label="no" v-model="settings.remove_on_uninstall">
+                        <el-checkbox :disabled="true" true-value="yes" false-value="no" v-model="settings.remove_on_uninstall">
                             Remove all data including <b>All Scripts</b> completely on plugin delete (coming soon)
                         </el-checkbox>
                     </el-form-item>

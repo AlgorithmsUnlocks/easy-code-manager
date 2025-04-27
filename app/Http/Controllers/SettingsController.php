@@ -21,7 +21,7 @@ class SettingsController
             'auto_disable'        => 'yes',
             'auto_publish'        => 'no',
             'remove_on_uninstall' => 'no',
-            'enable_line_wrap'    => 'no'
+            'enable_line_wrap'    => 'yes'
         ];
 
         if (!$config || !is_array($config) || empty($config['meta'])) {

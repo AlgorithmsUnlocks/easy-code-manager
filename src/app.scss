@@ -1130,3 +1130,17 @@ input.el-select__input {
 .fsnin_run_selector {
   position: relative;
 }
+
+.el-overlay {
+  z-index: 9999999 !important;
+}
+.el-drawer.rtl {
+  max-width: 700px;
+}
+
+.ecm_listed_checkboxes {
+  margin-top: 20px;
+  > label {
+    display: block;
+  }
+}
