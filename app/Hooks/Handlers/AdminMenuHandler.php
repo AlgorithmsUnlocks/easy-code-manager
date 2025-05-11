@@ -42,6 +42,13 @@ class AdminMenuHandler
             ], 422);
         }
 
+        $nonce = Arr::get($_REQUEST, '_nonce');
+        if(!$nonce || !wp_verify_nonce($nonce, 'fluent-snippets')) {
+            wp_send_json([
+                'status'  => false,
+                'message' => __('Invalid nonce.', 'easy-code-manager')
+            ], 422);
+        }
 
         $snippetDir = Helper::getStorageDir();
 
@@ -114,6 +121,14 @@ class AdminMenuHandler
             wp_send_json([
                 'status'  => false,
                 'message' => __('You do not have permission to perform this action.', 'easy-code-manager')
+            ], 422);
+        }
+
+        $nonce = Arr::get($_REQUEST, '_nonce');
+        if(!$nonce || !wp_verify_nonce($nonce, 'fluent-snippets')) {
+            wp_send_json([
+                'status'  => false,
+                'message' => __('Invalid nonce.', 'easy-code-manager')
             ], 422);
         }
 

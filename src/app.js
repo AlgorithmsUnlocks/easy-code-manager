@@ -80,6 +80,9 @@ app.mixin({
             return window.fluentSnippetAdmin.i18n[string] || string;
         },
         relativeTimeFromUtc(utcDateTime) {
+            if(!utcDateTime) {
+                return '';
+            }
             const localDateTime = dayjs.utc(utcDateTime).local();
             return localDateTime.fromNow();
         },
@@ -116,7 +119,8 @@ app.mixin({
 
             location.href = window.ajaxurl + '?' + jQuery.param({
                 action: 'fluent_snippets_export_snippets',
-                snippets: selected
+                snippets: selected,
+                _nonce: window.fluentSnippetAdmin.nonce
             });
         }
     },

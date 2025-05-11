@@ -290,9 +290,9 @@
                                 <div class="snippet_actions">
                                     <span v-if="!snippet.error"
                                           style="margin-right: 10px;">{{ limitChars(snippet.description, 50) }}</span>
-                                    <span :title="$t('Updated At:')"><el-icon><Stopwatch/></el-icon> {{
-                                            relativeTimeFromUtc(snippet.updated_at)
-                                        }}</span>
+                                    <span :title="$t('Updated At:')"><el-icon><Stopwatch/></el-icon>
+                                        {{ relativeTimeFromUtc(snippet.updated_at) }}
+                                    </span>
                                     <span class="fc_middot">|</span>
                                     <el-popconfirm width="220" @confirm="confirmDeleteSnippet(snippet)"
                                                    :title="$t('Are you sure to delete this?')">

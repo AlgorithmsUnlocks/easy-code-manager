@@ -449,8 +449,8 @@ class Snippet
             'type'         => 'PHP',
             'status'       => 'draft',
             'created_by'   => get_current_user_id(),
-            'created_at'   => date('Y-m-d H:i:s'),
-            'updated_at'   => date('Y-m-d H:i:s'),
+            'created_at'   => gmdate('Y-m-d H:i:s'),
+            'updated_at'   => gmdate('Y-m-d H:i:s'),
             'is_valid'     => 1,
             'updated_by'   => get_current_user_id(),
             'priority'     => 10,
@@ -464,7 +464,6 @@ class Snippet
         ];
 
         $metaData = Arr::only($metaData, array_keys($metaDefaults));
-
         $metaData = wp_parse_args($metaData, $metaDefaults);
 
         if (!is_numeric($metaData['priority']) || $metaData['priority'] < 1) {

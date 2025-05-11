@@ -42,3 +42,6 @@ You are more than welcome to contribute to the code or the documentation. Or hel
 - `npm install`
 - `npx mix watch` - For development
 - `npx mix --production` - For Production
+
+### Building the plugin for WP Repo
+- `sh build.sh --loco --node-build` // Build the plugin for WP repo with Loco Translate and Node build

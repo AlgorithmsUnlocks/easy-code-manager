@@ -136,6 +136,9 @@ class Arr
         $results = [];
 
         foreach ($keys as $key) {
+            if(!isset($array[$key])) {
+                continue;
+            }
             static::set($results, $key, static::get($array, $key));
         }
 

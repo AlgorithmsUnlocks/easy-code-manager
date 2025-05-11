@@ -55,7 +55,7 @@ class FluentSnippetCondition
     private function evaluateUserCondition($key, $operator, $value)
     {
         if ($key == 'authenticated') {
-            return is_user_logged_in();
+            return $value == (is_user_logged_in() ? 'yes' : 'no');
         }
 
         if ($key == 'role') {
@@ -147,7 +147,7 @@ class FluentSnippetCondition
                     return false;
                 }
 
-                $value = (array) $value;
+                $value = (array)$value;
 
                 $value = array_filter($value);
 

@@ -75,7 +75,7 @@ export default {
     computed: {
         import_url() {
             let url = window.ajaxurl;
-            url += (url.match(/\?/) ? '&' : '?') + jQuery.param({action: 'fluent_snippets_import_json'});
+            url += (url.match(/\?/) ? '&' : '?') + jQuery.param({action: 'fluent_snippets_import_json', _nonce: window.fluentSnippetAdmin.nonce});
             return url;
         },
         hasDraft() {
