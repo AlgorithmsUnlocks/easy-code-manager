@@ -2,14 +2,21 @@
     <div v-if="condition" class="snip_condition_wrap">
         <el-collapse v-model="activeName">
             <el-collapse-item name="condition">
-                <template #title>
-                    <h3 style="margin-right: 10px;">{{$t('Advanced Conditional Logic')}}</h3>
-                    <el-tooltip placement="top-start" class="box-item" effect="dark" content="Enable logic to add rules and limit where your snippet will be executed. Use multiple groups for different sets of rules.">
-                        <el-icon class="header-icon">
-                            <el-icon><InfoFilled /></el-icon>
-                        </el-icon>
-                    </el-tooltip>
-                </template>
+              <template #title>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h3 style="margin: 0;">{{ $t('Advanced Conditional Logic') }}</h3>
+                  <el-tooltip
+                      placement="top-start"
+                      class="box-item"
+                      effect="dark"
+                      content="Enable logic to add rules and limit where your snippet will be executed. Use multiple groups for different sets of rules."
+                  >
+                    <el-icon class="header-icon">
+                      <InfoFilled />
+                    </el-icon>
+                  </el-tooltip>
+                </div>
+              </template>
 
                 <div style="padding: 15px 15px 0;">
                     <el-form-item>
